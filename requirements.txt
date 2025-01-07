@@ -1,0 +1,12 @@
+Django==4.2.6
+crispy-bootstrap5==2023.10
+Pillow==10.1.0
+python-dateutil==2.8.2
+pytz==2023.3.post1
+requests==2.31.0
+gunicorn
+django-heroku
+boto3==1.35.90
+django-storages==1.14.4
+whitenoise==6.8.2
+python-dotenv==1.0.1

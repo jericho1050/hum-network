@@ -1,0 +1,135 @@
+{% extends "network/layout.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}
+    Profile
+{% endblock %}
+
+{% block body %}
+<div class="container">
+    <div class="row">
+        <div class="col-9">
+            {% if profile.profile_picture %}
+            <img id="profile-picture" src="{{ profile.profile_picture.url }}" alt="Your profile picture">
+            {% else %}
+            <img id="profile-picture" src="{{ MEDIA_URL }}no-picture.jpg" alt="profile picture">
+            {% endif %}
+            <h2 id="profile" class="post-by">{{ profile.username }}</h2>
+            <h4 class="follow">{{ profile.followers.count }} Followers </h4>
+            <h4 class="follow">{{ profile.following.count }} Following </h4>
+            {% if user.is_authenticated %}
+                {% if user.id != profile.id %}
+                    {% if is_followed == False %}
+                        <form id="follow-form" method="POST" class="btn-follow">
+                            {% csrf_token %}
+                            <input type="hidden" value="{{ profile.username }}" id="followee">
+                            <input type="hidden" value="{{ user.username }}" id="follower">
+                            <input type="hidden" value="follow" id="action">
+                            <button type="submit" class="btn btn-primary">Follow</button>
+                        </form>
+                    {% else %}
+                        <form id="follow-form" method="POST" class="btn-follow">
+                            {% csrf_token %}
+                            <input type="hidden" value="{{ profile.username }}" id="followee">
+                            <input type="hidden" value="{{ user.username }}" id="follower">
+                            <input type="hidden" value="unfollow" id="action">
+                            <button type="submit" class="btn btn-primary">Unfollow</button>
+                        </form>                
+                    {% endif %}
+                {% endif %}
+            {% endif %}
+            {% if user.id == profile.id %}
+                <h5 style="font-size: smaller;">Upload Profile Picture</h5>
+                <form id="upload-pic" method="POST" action="{% url 'profile' profile.id %}" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    {{ form | crispy }}
+                    <button type="submit" class="btn btn-primary">Upload</button>
+                </form>
+            {% endif %}
+        </div>
+    </div>
+    <hr class="col-9"> 
+    {% for post in posts %}
+    <div class="row">
+        <div class="col-9">
+            <div class="profile-picture">
+                {% if post.post_by.profile_picture %}
+                <a href="{% url 'profile' post.post_by.id %}"><img id="profile-pic" src="{{ post.post_by.profile_picture.url }}" alt="profile picture"></a>
+                {% else %}
+                <a href="{% url 'profile' post.post_by.id %}"><img id="profile-pic" src="{{ MEDIA_URL }}no-picture.jpg" alt="profile picutre"></a>
+                {% endif %}
+            </div>
+            <div class="post-by">
+                <a href="{% url 'profile' post.post_by.id %}">{{ post.post_by }} {{ post.liked_by }}</a> 
+            </div>
+            {% if user.id == post.post_by.id %}
+            <span class="edit-icon" style="float:right">
+                <i class="far fa-edit" data-post="{{ post.id }}" style="font-size: 20px;"></i>
+            </span>
+            {% endif %}
+            <small>
+                {{ post.post_time }}
+            </small>
+            <p class="content" data-content="{{ post.content }}" id="content-{{ post.id }}">{{ post.content }}</p>
+            <div class="svg-wrapper" id="react-{{ post.id }}">
+                <!--Finds currently logged in User who liked this post-->
+                {% if post.user_has_liked %}
+                <img src="{{ MEDIA_URL }}heart.png" class="heart-animation" id="heart-icon-{{ post.id }}" liked="true">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="1em" height="1em" fill="currentColor" style="font-size: 25px; display:none;">
+                    <!--! Font Awesome Free 6.1.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. -->
+                    <path d="M244 84L255.1 96L267.1 84.02C300.6 51.37 347 36.51 392.6 44.1C461.5 55.58 512 115.2 512 185.1V190.9C512 232.4 494.8 272.1 464.4 300.4L283.7 469.1C276.2 476.1 266.3 480 256 480C245.7 480 235.8 476.1 228.3 469.1L47.59 300.4C17.23 272.1 0 232.4 0 190.9V185.1C0 115.2 50.52 55.58 119.4 44.1C164.1 36.51 211.4 51.37 244 84C243.1 84 244 84.01 244 84L244 84zM255.1 163.9L210.1 117.1C188.4 96.28 157.6 86.4 127.3 91.44C81.55 99.07 48 138.7 48 185.1V190.9C48 219.1 59.71 246.1 80.34 265.3L256 429.3L431.7 265.3C452.3 246.1 464 219.1 464 190.9V185.1C464 138.7 430.4 99.07 384.7 91.44C354.4 86.4 323.6 96.28 301.9 117.1L255.1 163.9z"></path>
+                </svg>
+
+                {% else %}
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="1em" height="1em" fill="currentColor" style="font-size: 25px;">
+                    <!--! Font Awesome Free 6.1.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. -->
+                    <path d="M244 84L255.1 96L267.1 84.02C300.6 51.37 347 36.51 392.6 44.1C461.5 55.58 512 115.2 512 185.1V190.9C512 232.4 494.8 272.1 464.4 300.4L283.7 469.1C276.2 476.1 266.3 480 256 480C245.7 480 235.8 476.1 228.3 469.1L47.59 300.4C17.23 272.1 0 232.4 0 190.9V185.1C0 115.2 50.52 55.58 119.4 44.1C164.1 36.51 211.4 51.37 244 84C243.1 84 244 84.01 244 84L244 84zM255.1 163.9L210.1 117.1C188.4 96.28 157.6 86.4 127.3 91.44C81.55 99.07 48 138.7 48 185.1V190.9C48 219.1 59.71 246.1 80.34 265.3L256 429.3L431.7 265.3C452.3 246.1 464 219.1 464 190.9V185.1C464 138.7 430.4 99.07 384.7 91.44C354.4 86.4 323.6 96.28 301.9 117.1L255.1 163.9z"></path>
+                </svg>
+
+                {% endif %}
+            </div>
+            <div class="like-count" id="like-count-{{ post.id }}">
+                {{ post.like_count }}
+            </div>
+        </div>
+    </div>
+    <hr class="col-9"> 
+    <br>
+    {% endfor %}
+    <nav aria-label="Page navigation example">
+        <ul class="pagination justify-content-center">
+            {% if posts.has_previous %}
+            <li class="page-item">
+                <a href="?page={{ posts.previous_page_number }}" class="page-link">Previous</a>
+            </li>
+            {% else %}
+            <li class="page-item disabled">
+                <a class="page-link">Previous</a>
+            </li>
+            {% endif %}
+            <!-- <li class="page-item active" aria-current="page"><a class="page-link" href="#">{{ page_obj.number }}</a></li> -->
+
+            {% for i in posts.paginator.page_range %}
+                {% if i == posts.number %}
+                    <li class="page-item active"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
+                {% else %}
+                    <li class="page-item"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
+                {% endif %}
+
+            {% endfor %}
+
+          {% if posts.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ posts.next_page_number }}">Next</a>
+            </li>
+          {% else %}
+            <li class="page-item disabled">
+                <a class="page-link">Next</a>
+            </li>
+          {% endif %}
+        </ul>
+      </nav>
+</div>
+
+{% endblock %}
+
