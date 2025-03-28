@@ -1,3 +1,297 @@
+/* General Styles */
+:root {
+    --primary-color: #1DA1F2;
+    --secondary-color: #14171A;
+    --light-gray: #f7f9fa;
+    --medium-gray: #E1E8ED;
+    --dark-gray: #657786;
+    --danger: #E0245E;
+    --success: #17bf63;
+    --border-color: #eaeaea;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: var(--light-gray);
+    color: var(--secondary-color);
+    line-height: 1.5;
+}
+
+a {
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* Navigation */
+.navbar {
+    border-bottom: 1px solid var(--border-color);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    background-color: white !important;
+    margin-bottom: 0;
+}
+
+.navbar-brand {
+    font-weight: bold;
+    color: var(--primary-color) !important;
+}
+
+#logo {
+    height: 30px;
+    margin-right: 8px;
+}
+
+/* Card Styles */
+.card {
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.03);
+    transition: box-shadow 0.2s ease;
+    margin-bottom: 16px;
+    overflow: hidden;
+}
+
+.card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.card-body {
+    padding: 16px;
+}
+
+/* Post Styles */
+#posts-view .card {
+    margin-bottom: 16px;
+    background-color: white;
+}
+
+.card-subtitle a {
+    font-weight: 600;
+    color: var(--secondary-color);
+}
+
+.card-text {
+    margin-top: 0.75rem;
+    white-space: pre-line;
+    word-wrap: break-word;
+}
+
+/* Form Styles */
+textarea.form-control {
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    resize: none;
+    box-shadow: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+textarea.form-control:focus {
+    box-shadow: 0 0 0 2px rgba(29, 161, 242, 0.2);
+    border-color: var(--primary-color);
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    border-radius: 20px;
+    padding: 0.375rem 1.25rem;
+    font-weight: 600;
+}
+
+.btn-primary:hover {
+    background-color: #0d8cd8;
+    border-color: #0d8cd8;
+}
+
+.btn-outline-primary {
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+    border-radius: 20px;
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+/* Button styles */
+.btn-sm {
+    border-radius: 20px;
+    padding: 0.25rem 0.75rem;
+}
+
+.btn-outline-secondary, .btn-outline-danger {
+    border-radius: 20px;
+}
+
+/* Animation for likes */
+@keyframes heartBeat {
+    0% {
+        transform: scale(1);
+    }
+    14% {
+        transform: scale(1.3);
+    }
+    28% {
+        transform: scale(1);
+    }
+    42% {
+        transform: scale(1.3);
+    }
+    70% {
+        transform: scale(1);
+    }
+}
+
+.btn-danger, .btn-outline-danger:hover {
+    animation: heartBeat 1s;
+}
+
+/* Profile Styles */
+.profile-header {
+    background-color: white;
+    border-radius: 12px;
+    padding: 2rem;
+    margin-bottom: 1rem;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.03);
+}
+
+.profile-picture img {
+    border-radius: 50%;
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+    border: 4px solid white;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.profile-stats {
+    display: flex;
+    gap: 2rem;
+    margin-top: 1rem;
+}
+
+.profile-stat {
+    text-align: center;
+}
+
+.profile-stat-value {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--secondary-color);
+}
+
+.profile-stat-label {
+    color: var(--dark-gray);
+    font-size: 0.9rem;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    .container {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+    
+    .profile-header {
+        padding: 1rem;
+    }
+    
+    .profile-picture img {
+        width: 100px;
+        height: 100px;
+    }
+}
+
+/* HTMX Indicators and Animations */
+.htmx-indicator {
+    opacity: 0;
+    transition: opacity 500ms ease-in;
+}
+
+.htmx-request .htmx-indicator {
+    opacity: 1;
+}
+
+.htmx-swapping {
+    opacity: 0.5;
+}
+
+/* Additional UI elements */
+.char-count {
+    color: var(--dark-gray);
+}
+
+.char-count.warning {
+    color: orange;
+}
+
+.char-count.danger {
+    color: var(--danger);
+}
+
+/* Post composer */
+.create-post-card {
+    margin-bottom: 20px;
+    background-color: white;
+    border-color: var(--border-color);
+}
+
+/* Comment section */
+.comment-section {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border-color);
+}
+
+.comment-form textarea {
+    border-radius: 20px;
+    padding: 10px 15px;
+    transition: height 0.2s ease;
+    min-height: 3em;
+}
+
+.comment-form textarea:focus {
+    height: 60px;
+}
+
+.comment-list {
+    margin-top: 10px;
+}
+
+.comment-item {
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.comment-item:last-child {
+    border-bottom: none;
+}
+
+/* Filters and tabs */
+.filter-tabs {
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.filter-tabs .nav-link {
+    color: var(--dark-gray);
+    font-weight: 600;
+    padding: 12px 16px;
+    border: none;
+    border-bottom: 2px solid transparent;
+}
+
+.filter-tabs .nav-link.active {
+    color: var(--primary-color);
+    background-color: transparent;
+    border-bottom: 2px solid var(--primary-color);
+}
+
 .row {
     justify-content: center;
 }
@@ -151,13 +445,59 @@ svg:hover {
     }
 }
 
-#logo {
-    width: 30px;
-    height: 30px;
-    margin-right: 8px;
-    vertical-align: middle;
-}
-
 .error {
     color: red;
+}
+
+/* Like Button Styles */
+.like-btn {
+    background: transparent;
+    border: none;
+    padding: 5px 10px;
+    transition: transform 0.2s ease;
+}
+
+.like-btn:hover {
+    background: transparent;
+    transform: scale(1.1);
+}
+
+.like-btn:focus {
+    box-shadow: none;
+    outline: none;
+}
+
+.like-btn .bi-heart-fill {
+    color: var(--danger);
+}
+
+.like-btn .like-count {
+    font-size: 0.9rem;
+    margin-left: 3px;
+}
+
+/* Filter buttons styling */
+.filter-buttons {
+  display: flex;
+  margin-bottom: 1rem;
+}
+
+.filter-buttons .btn {
+  border-radius: 20px;
+  padding: 0.375rem 1rem;
+}
+
+.filter-buttons .text-primary {
+  position: relative;
+}
+
+.filter-buttons .text-primary::after {
+  content: '';
+  position: absolute;
+  bottom: -3px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background-color: var(--bs-primary);
+  border-radius: 1px;
 }

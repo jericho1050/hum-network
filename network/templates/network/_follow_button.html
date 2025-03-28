@@ -1,0 +1,13 @@
+{% if user.is_authenticated and user.id != profile.id %}
+  <form hx-post="{% url 'toggle_follow' profile.id %}"
+        hx-target="#follow-section"
+        hx-swap="outerHTML"
+        class="d-inline">
+    {% csrf_token %}
+    <button type="submit" 
+            class="btn like-btn {% if is_followed %}text-primary fw-bold{% else %}text-muted{% endif %}">
+      <i class="bi {% if is_followed %}bi-person-check-fill{% else %}bi-person-plus{% endif %}"></i>
+      {% if is_followed %}Following{% else %}Follow{% endif %}
+    </button>
+  </form>
+{% endif %} 

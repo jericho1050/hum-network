@@ -1,0 +1,30 @@
+{% comment %}
+This template handles rendering the like button with the correct status and count.
+It receives the 'post' object as context, and optionally 'liked' status.
+{% endcomment %}
+
+{% if liked is None %}
+  {% with user_has_liked=post.user_has_liked %}
+    <form hx-post="{% url 'toggle_like' post.id %}"
+          hx-target="#like-section-{{ post.id }}"
+          hx-swap="outerHTML"
+          class="d-inline">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-sm like-btn {% if user_has_liked %}text-danger{% else %}text-muted{% endif %}">
+            <i class="bi {% if user_has_liked %}bi-heart-fill{% else %}bi-heart{% endif %}"></i> 
+            <span class="like-count">{{ post.like_count }}</span>
+        </button>
+    </form>
+  {% endwith %}
+{% else %}
+  <form hx-post="{% url 'toggle_like' post.id %}"
+        hx-target="#like-section-{{ post.id }}"
+        hx-swap="outerHTML"
+        class="d-inline">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-sm like-btn {% if liked %}text-danger{% else %}text-muted{% endif %}">
+          <i class="bi {% if liked %}bi-heart-fill{% else %}bi-heart{% endif %}"></i> 
+          <span class="like-count">{{ like_count }}</span>
+      </button>
+  </form>
+{% endif %} 

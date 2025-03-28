@@ -1,0 +1,21 @@
+{% for post in posts %}
+    {% include "network/_post.html" with post=post %}
+{% empty %}
+    {% if request.get_full_path == '/following' %}
+        <div class="alert alert-info text-center">
+            <p class="mb-0">You're not following anyone yet or they haven't posted anything.</p>
+            <a href="{% url 'index' %}" class="btn like-btn text-primary fw-bold mt-3">Discover Users</a>
+        </div>
+    {% elif '/profile/' in request.get_full_path %}
+        <div class="alert alert-info text-center">
+            <p class="mb-0">This user hasn't posted anything yet.</p>
+        </div>
+    {% else %}
+        <div class="alert alert-info text-center">
+            <p class="mb-0">No posts yet. Be the first to post!</p>
+        </div>
+    {% endif %}
+{% endfor %}
+
+<!-- Infinite scroll trigger -->
+{% include "network/_load_more.html" with posts=posts %} 

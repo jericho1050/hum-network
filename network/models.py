@@ -1,5 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.utils import timezone
 
 
 class User(AbstractUser):
@@ -8,15 +9,27 @@ class User(AbstractUser):
 class Post(models.Model):
     content = models.TextField(verbose_name="", blank=False)
     post_date = models.DateField(auto_now_add=True)
-    post_time = models.DateTimeField(auto_now_add=True)
-    post_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name="posts")
+    timestamp = models.DateTimeField(auto_now_add=True)
+    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="posts")
     like_count = models.IntegerField(default=0)
 
     def __str__(self):
-        return f"{self.post_by}: {self.content}"
+        return f"{self.author}: {self.content}"
     
     def liked_by_users(self):
         return [like.liked_by for like in self.likes_set.all()]
+    
+    @property
+    def post_time(self):
+        return self.timestamp
+    
+    @property
+    def post_by(self):
+        return self.author
+        
+    @property
+    def comment_count(self):
+        return self.comments.count()
 
 class Likes(models.Model):
     liked_by = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -36,4 +49,8 @@ class Follow(models.Model):
 class Comment(models.Model):
     comment = models.TextField()
     comment_by = models.ForeignKey(User, on_delete=models.CASCADE)
-    comment_to = models.ForeignKey(Post, on_delete=models.CASCADE)
+    comment_to = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="comments")
+    timestamp = models.DateTimeField(default=timezone.now)
+
+    def __str__(self):
+        return f"{self.comment_by} commented on {self.comment_to}"

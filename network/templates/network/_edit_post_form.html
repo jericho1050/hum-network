@@ -1,0 +1,36 @@
+{% load crispy_forms_tags %}
+
+<div id="post-content-{{ post.id }}">
+  <form hx-post="{% url 'edit_post' post.id %}"
+        hx-target="#post-content-{{ post.id }}"
+        hx-swap="outerHTML">
+    {% csrf_token %}
+    <div class="mb-3">
+      <textarea name="content" 
+                class="form-control" 
+                rows="3" 
+                required
+                maxlength="280">{{ post.content }}</textarea>
+      <div class="d-flex justify-content-between align-items-center mt-2">
+        <span class="text-muted small"><span id="edit-char-count-{{ post.id }}">{{ post.content|length }}</span>/280</span>
+        <div class="d-flex">
+          <button type="button" 
+                  class="btn btn-sm btn-outline-secondary me-2 px-3 py-1"
+                  hx-get="{% url 'cancel_edit' post.id %}"
+                  hx-target="#post-content-{{ post.id }}"
+                  hx-swap="outerHTML">
+            Cancel
+          </button>
+          <button type="submit" class="btn btn-sm btn-primary px-3 py-1">Save</button>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+
+<script>
+  // Simple character counter for the edit form
+  document.querySelector('textarea[name="content"]').addEventListener('input', function() {
+    document.getElementById('edit-char-count-{{ post.id }}').innerText = this.value.length;
+  });
+</script> 

@@ -1,11 +1,11 @@
-{% extends "network/layout.html" %}
+{% extends "network/content_only.html" %}
+
 {% load crispy_forms_tags %}
 
-{% block body %}
+{% block content %}
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2>All Posts</h2>
-        {# Filter buttons will now be included inside the post-feed-area below #}
     </div>
     
     {% if user.is_authenticated %}
@@ -28,7 +28,7 @@
             <form method="post"
                   action="{% url 'index' %}"
                   hx-post="{% url 'index' %}"
-                  hx-target="#posts-view" {# Posting still targets only the posts view #}
+                  hx-target="#posts-view" 
                   hx-swap="afterbegin"
                   hx-indicator="#post-indicator">
                 {% csrf_token %}
@@ -54,7 +54,7 @@
     <!-- This is the main wrapper for the filter buttons and the posts list -->
     <div id="post-feed-area"> 
         <!-- Filter options included here -->
-        <div class="mb-4"> {# Add some margin below the buttons #}
+        <div class="mb-4">
              {% include "network/_filter_buttons.html" with current_page=current_filter|default:"all_posts" %} 
         </div>
 

@@ -1,0 +1,14 @@
+{% if posts.has_next %}
+<div class="text-center py-3"
+     hx-get="{% url 'load_more' %}?page={{ posts.next_page_number }}"
+     hx-trigger="revealed"
+     hx-target="this"
+     hx-swap="outerHTML"
+     hx-indicator="#loading-indicator">
+    <div id="loading-indicator" class="htmx-indicator">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+</div>
+{% endif %} 
