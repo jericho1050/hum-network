@@ -18,3 +18,20 @@ class PostModelForm(forms.ModelForm):
             'content': forms.Textarea(attrs={'class': 'textarea', 'placeholder': "What's on your mind? Post something here."}),
         }
         exclude = [ ]
+        
+class PostForm(forms.ModelForm):
+    content = forms.CharField(
+        widget=forms.Textarea(attrs={
+            'rows': 3,
+            'class': 'form-control',
+            'placeholder': "What's happening?",
+            # Basic character counter example (can be enhanced with JS/HTMX extensions)
+            'maxlength': '280',
+            'oninput': "document.getElementById('char-count').innerText = this.value.length + '/280';"
+        }),
+        label="" # Hide the default label
+    )
+
+    class Meta:
+        model = Post
+        fields = ['content']

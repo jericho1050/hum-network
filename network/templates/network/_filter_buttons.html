@@ -1,0 +1,21 @@
+{% load django_htmx %}
+
+<div class="filter-buttons" role="group">
+    <a href="{% url 'index' %}" 
+       class="btn like-btn {% if current_page == 'all_posts' %}text-primary fw-bold{% else %}text-muted{% endif %}" 
+       hx-get="{% url 'index' %}?htmx=true" 
+       hx-target="#post-feed-area"
+       hx-select="#post-feed-area"
+       hx-swap="innerHTML"
+       hx-push-url="{% url 'index' %}">All Posts</a>
+    
+    {% if user.is_authenticated %}
+    <a href="{% url 'following' %}" 
+       class="btn like-btn ms-2 {% if current_page == 'following' %}text-primary fw-bold{% else %}text-muted{% endif %}" 
+       hx-get="{% url 'following' %}?htmx=true" 
+       hx-target="#post-feed-area"      
+       hx-select="#main-content"
+       hx-swap="innerHTML"
+       hx-push-url="{% url 'following' %}">Following</a>
+    {% endif %}
+</div> 

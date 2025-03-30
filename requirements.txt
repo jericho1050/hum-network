@@ -10,3 +10,4 @@ boto3==1.35.90
 django-storages==1.14.4
 whitenoise==6.8.2
 python-dotenv==1.0.1
+django-htmx==1.23.0

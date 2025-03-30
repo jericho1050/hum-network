@@ -1,0 +1,11 @@
+<!-- Template fragment for the post-feed-area -->
+
+<!-- Filter options included here -->
+<div class="mb-4">
+     {% include "network/_filter_buttons.html" with current_page=current_page %}
+</div>
+
+<!-- Post feed starts here -->
+<div id="posts-view">
+    {% include "network/_posts_list.html" with posts=posts %}
+</div> 

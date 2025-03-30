@@ -1,0 +1,36 @@
+{% load humanize %}
+
+<div class="comment-section" id="comment-section-{{ post.id }}">
+  {% if comments %}
+    <div class="comment-list">
+      {% for comment in comments %}
+        {% include "network/_comment_item.html" with comment=comment %}
+      {% endfor %}
+    </div>
+  {% endif %}
+  
+  {% if user.is_authenticated %}
+    <div class="comment-form mt-3">
+      <form hx-post="{% url 'add_comment' post.id %}"
+            hx-target="#comment-section-{{ post.id }}"
+            hx-swap="outerHTML"
+            class="d-flex align-items-center">
+        {% csrf_token %}
+        <div class="me-2">
+          {% if user.profile_picture %}
+            <img src="{{ user.profile_picture.url }}" class="rounded-circle" width="32" height="32" alt="Your profile picture">
+          {% else %}
+            <img src="{{ MEDIA_URL }}no-picture.jpg" class="rounded-circle" width="32" height="32" alt="Your profile picture">
+          {% endif %}
+        </div>
+        <div class="flex-grow-1 me-2">
+          <textarea name="comment" rows="4" class="form-control" placeholder="Add a comment..." required></textarea>
+        </div>
+        <button type="submit" class="btn btn-sm like-btn text-primary fw-bold" id="comment-submit-{{ post.id }}">
+          <span class="d-none d-md-inline">Comment</span>
+          <i class="bi bi-send"></i>
+        </button>
+      </form>
+    </div>
+  {% endif %}
+</div> 

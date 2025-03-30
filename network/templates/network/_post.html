@@ -1,0 +1,78 @@
+{% load humanize %}
+
+<div class="card mb-3 shadow-sm" id="post-{{ post.id }}">
+  <div class="card-body">
+    <div class="d-flex align-items-center mb-2">
+      <div class="me-2">
+        {% if post.author.profile_picture %}
+        <a href="{% url 'profile' post.author.id %}">
+          <img src="{{ post.author.profile_picture.url }}" class="rounded-circle" width="40" height="40" alt="Profile picture">
+        </a>
+        {% elif post.post_by.profile_picture %}
+        <a href="{% url 'profile' post.post_by.id %}">
+          <img src="{{ post.post_by.profile_picture.url }}" class="rounded-circle" width="40" height="40" alt="Profile picture">
+        </a>
+        {% else %}
+        <a href="{% url 'profile' post.author.id|default:post.post_by.id %}">
+          <img src="{{ MEDIA_URL }}no-picture.jpg" class="rounded-circle" width="40" height="40" alt="Profile picture">
+        </a>
+        {% endif %}
+      </div>
+      <div>
+        <h6 class="card-subtitle mb-0">
+          <a href="{% url 'profile' post.author.id|default:post.post_by.id %}" 
+             class="text-decoration-none" 
+             hx-get="{% url 'profile' post.author.id|default:post.post_by.id %}?htmx=true" {# Explicitly GET the profile content URL #}
+             hx-target="#main-content"                 {# Target the main content div from layout.html #}
+             hx-swap="innerHTML show:window:top"       {# Swap its inner HTML and scroll to top #}
+             hx-push-url="true"
+             hx-select="#main-content">    {# Select only #main-content from response #}
+            @{{ post.author.username|default:post.post_by.username }}
+          </a>
+        </h6>
+        <small class="text-muted">{{ post.timestamp|default:post.post_time|naturaltime }}</small>
+      </div>
+      
+      {% if user == post.author or user == post.post_by %}
+      <div class="ms-auto">
+        <button class="btn btn-sm like-btn text-primary" 
+                hx-get="{% url 'edit_post' post.id %}" 
+                hx-target="#post-content-{{ post.id }}" 
+                hx-swap="outerHTML">
+          <i class="bi bi-pencil"></i> <span class="d-none d-md-inline">Edit</span>
+        </button>
+        <button class="btn btn-sm like-btn text-danger ms-2" 
+                hx-delete="{% url 'delete_post' post.id %}" 
+                hx-target="#post-{{ post.id }}" 
+                hx-swap="outerHTML"
+                hx-confirm="Are you sure you want to delete this post?">
+          <i class="bi bi-trash"></i> <span class="d-none d-md-inline">Delete</span>
+        </button>
+      </div>
+      {% endif %}
+    </div>
+    
+    <div id="post-content-{{ post.id }}">
+      <p class="card-text">{{ post.content|linebreaksbr }}</p>
+    </div>
+
+    <div class="d-flex justify-content-start align-items-center mt-3">
+      <!-- Like Button Section -->
+      <div id="like-section-{{ post.id }}">
+        {% include "network/_like_button.html" with post=post %}
+      </div>
+      
+      <!-- Comment Button -->
+      <button class="btn btn-sm like-btn text-muted ms-2"
+              hx-get="{% url 'get_comments' post.id %}"
+              hx-target="#comment-section-{{ post.id }}"
+              hx-swap="outerHTML"
+              hx-trigger="click once">
+        <i class="bi bi-chat"></i> <span class="d-none d-md-inline">Comments</span> <span class="comment-count">{{ post.comment_count }}</span>
+      </button>
+    </div>
+    
+    <!-- Comment Section (initially empty, loaded on demand) -->
+    <div id="comment-section-{{ post.id }}"></div>
+  </div>
+</div> 
