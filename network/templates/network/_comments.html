@@ -24,11 +24,15 @@
           {% endif %}
         </div>
         <div class="flex-grow-1 me-2">
-          <textarea name="comment" rows="4" class="form-control" placeholder="Add a comment..." required></textarea>
+          {# Added style for vertical resize #}
+          <textarea name="comment" rows="1" class="form-control" placeholder="Add a comment..." required style="resize: vertical; min-height: 38px;"></textarea>
         </div>
+        {# Added htmx-indicator class to the button and the SVG indicator #}
         <button type="submit" class="btn btn-sm like-btn text-primary fw-bold" id="comment-submit-{{ post.id }}">
           <span class="d-none d-md-inline">Comment</span>
           <i class="bi bi-send"></i>
+          {# Added SVG indicator #}
+          <svg style="width: 1.5rem; height: 1.5rem; vertical-align: middle; margin-left: 5px;" class="spinner htmx-indicator" fill="hsl(228, 97%, 42%)" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12,1A11,11,0,1,0,23,12,11,11,0,0,0,12,1Zm0,20a9,9,0,1,1,9-9A9,9,0,0,1,12,21Z"/><rect x="11" y="6" rx="1" width="2" height="2"><animateTransform attributeName="transform" type="rotate" dur="9s" values="0 12 12;360 12 12" repeatCount="indefinite"/></rect><rect x="11" y="11" rx="1" width="2" height="9"><animateTransform attributeName="transform" type="rotate" dur="0.75s" values="0 12 12;360 12 12" repeatCount="indefinite"/></rect></svg>
         </button>
       </form>
     </div>

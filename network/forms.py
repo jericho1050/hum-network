@@ -26,8 +26,7 @@ class PostForm(forms.ModelForm):
             'class': 'form-control',
             'placeholder': "What's happening?",
             # Basic character counter example (can be enhanced with JS/HTMX extensions)
-            'maxlength': '280',
-            'oninput': "document.getElementById('char-count').innerText = this.value.length + '/280';"
+            'oninput': "document.getElementById('char-count').innerText = this.value.length;"
         }),
         label="" # Hide the default label
     )

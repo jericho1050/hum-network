@@ -29,7 +29,7 @@
                 {% csrf_token %}
                 {{ form|crispy }}
                 <div class="d-flex justify-content-between align-items-center mt-3">
-                    <span id="char-count" class="text-muted small">0/280</span>
+                    <span id="char-count" class="text-muted small">0</span>
                     <button type="submit" class="btn like-btn text-primary fw-bold">
                         <i class="bi bi-send-fill me-1"></i> Post
                     </button>
@@ -69,7 +69,7 @@
         if (textarea && charCount) {
             textarea.addEventListener('input', function() {
                 const count = this.value.length;
-                charCount.textContent = count + '/280';
+                charCount.textContent = count;
                 
                 // Add warning classes for approaching limit
                 if (count > 240 && count <= 270) {
