@@ -1,0 +1,42 @@
+{% load humanize %}
+
+<div class="comment-item" id="comment-{{ comment.id }}">
+  <div class="d-flex">
+    <div class="me-2">
+      {% if comment.comment_by.profile_picture %}
+        <a href="{% url 'profile' comment.comment_by.id %}">
+          <img src="{{ comment.comment_by.profile_picture.url }}" class="rounded-circle" width="24" height="24" alt="Profile picture">
+        </a>
+      {% else %}
+        <a href="{% url 'profile' comment.comment_by.id %}">
+          <img src="{{ MEDIA_URL }}no-picture.jpg" class="rounded-circle" width="24" height="24" alt="Profile picture">
+        </a>
+      {% endif %}
+    </div>
+    <div>
+      <div>
+        <a href="{% url 'profile' comment.comment_by.id %}" class="fw-bold text-decoration-none">{{ comment.comment_by.username }}</a>
+        <span class="text-muted">{{ comment.timestamp|naturaltime }}</span>
+      </div>
+      <p class="mb-1">{{ comment.comment }}</p>
+    </div>
+    {% if user == comment.comment_by %}
+    <div class="ms-auto">
+      <button class="btn btn-sm btn-link text-secondary p-0 me-1"
+      title="Edit comment"
+      hx-get="{% url 'edit_comment' comment.id %}" 
+      hx-target="#comment-{{ comment.id }}" 
+      hx-swap="outerHTML">
+        <i class="bi bi-pencil-square"></i>
+      </button>
+      <button class="btn btn-sm like-btn text-danger" 
+              hx-delete="{% url 'delete_comment' comment.id %}" 
+              hx-target="#comment-{{ comment.id }}" 
+              hx-swap="outerHTML"
+              hx-confirm="Delete this comment?">
+        <i class="bi bi-trash"></i>
+      </button>
+    </div>
+    {% endif %}
+  </div>
+</div>

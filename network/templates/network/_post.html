@@ -20,7 +20,13 @@
       </div>
       <div>
         <h6 class="card-subtitle mb-0">
-          <a href="{% url 'profile' post.author.id|default:post.post_by.id %}" class="text-decoration-none">
+          <a href="{% url 'profile' post.author.id|default:post.post_by.id %}" 
+             class="text-decoration-none" 
+             hx-get="{% url 'profile' post.author.id|default:post.post_by.id %}?htmx=true" {# Explicitly GET the profile content URL #}
+             hx-target="#main-content"                 {# Target the main content div from layout.html #}
+             hx-swap="innerHTML show:window:top"       {# Swap its inner HTML and scroll to top #}
+             hx-push-url="true"
+             hx-select="#main-content">    {# Select only #main-content from response #}
             @{{ post.author.username|default:post.post_by.username }}
           </a>
         </h6>

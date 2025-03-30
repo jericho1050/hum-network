@@ -20,6 +20,9 @@ urlpatterns = [
     path("get_comments/<int:post_id>/", views.get_comments, name="get_comments"),
     path("add_comment/<int:post_id>/", views.add_comment, name="add_comment"),
     path("delete_comment/<int:comment_id>/", views.delete_comment, name="delete_comment"),
+    path("edit_comment/<int:comment_id>/", views.edit_comment, name="edit_comment"),
+    path("update_comment/<int:comment_id>/", views.update_comment, name="update_comment"),
+    path("cancel_edit_comment/<int:comment_id>/", views.cancel_edit_comment, name="cancel_edit_comment"),
 
     # API Routes
     path("posts", views.post, name="post"),

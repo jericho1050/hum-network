@@ -3,7 +3,7 @@ from json import JSONDecodeError
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError
-from django.http import HttpResponse, HttpResponseRedirect, JsonResponse, HttpResponseBadRequest
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse, HttpResponseBadRequest, QueryDict
 from django.core.paginator import Paginator
 from django.shortcuts import redirect, render, get_object_or_404
 from django.template.loader import render_to_string
@@ -75,11 +75,11 @@ def index(request):
         if request.GET.get('filter') == 'true':
             # Only return the post feed area for filter buttons
             return render(request, 'network/_post_feed_area.html', context)
-        else:
-            # This is a full navigation request from nav bar
-            return render(request, 'network/index_content.html', context)
-    
-    # For regular page load, render the full page with context
+        # else: # Removed else block - render the main index.html for full content swaps
+        #     # This is a full navigation request from nav bar
+        #     return render(request, 'network/index_content.html', context)
+
+    # For regular page load or full HTMX content swap, render the full page with context
     return render(request, 'network/index.html', context)
 
 
@@ -99,17 +99,18 @@ def login_view(request):
                 "message": "Invalid username and/or password."
             }
             
-            # For HTMX requests, return content-only template
-            if request.htmx:
-                return render(request, "network/login_content.html", context)
-            else:
-                return render(request, "network/login.html", context)
+            # Render the main login.html for both HTMX and regular requests if validation fails
+            # The template handles block rendering correctly for HTMX swaps into #main-content
+            # if request.htmx: # Removed condition
+            #     return render(request, "network/login_content.html", context)
+            # else:
+            return render(request, "network/login.html", context)
     else:
-        # For HTMX requests, return content-only template
-        if request.htmx:
-            return render(request, "network/login_content.html")
-        else:
-            return render(request, "network/login.html")
+        # Render the main login.html for both GET requests (HTMX or regular)
+        # if request.htmx: # Removed condition
+        #     return render(request, "network/login_content.html")
+        # else:
+        return render(request, "network/login.html")
 
 
 def logout_view(request):
@@ -129,12 +130,12 @@ def register(request):
             context = {
                 "message": "Passwords must match."
             }
-            
-            # For HTMX requests, return content-only template
-            if request.htmx:
-                return render(request, "network/register_content.html", context)
-            else:
-                return render(request, "network/register.html", context)
+
+            # Render the main register.html for both HTMX and regular requests if validation fails
+            # if request.htmx: # Removed condition
+            #     return render(request, "network/register_content.html", context)
+            # else:
+            return render(request, "network/register.html", context)
 
         # Attempt to create new user
         try:
@@ -144,21 +145,21 @@ def register(request):
             context = {
                 "message": "Username already taken."
             }
-            
-            # For HTMX requests, return content-only template
-            if request.htmx:
-                return render(request, "network/register_content.html", context)
-            else:
-                return render(request, "network/register.html", context)
+
+            # Render the main register.html for both HTMX and regular requests if user exists
+            # if request.htmx: # Removed condition
+            #     return render(request, "network/register_content.html", context)
+            # else:
+            return render(request, "network/register.html", context)
                 
         login(request, user)
         return HttpResponseRedirect(reverse("index"))
     else:
-        # For HTMX requests, return content-only template
-        if request.htmx:
-            return render(request, "network/register_content.html")
-        else:
-            return render(request, "network/register.html")
+        # Render the main register.html for both GET requests (HTMX or regular)
+        # if request.htmx: # Removed condition
+        #     return render(request, "network/register_content.html")
+        # else:
+        return render(request, "network/register.html")
     
 
 @login_required
@@ -177,7 +178,6 @@ def post(request):
         post = Post.objects.get(id=data["post_id"])
         post.content = content
         post.save()
-
 
     else:
         # check post's content
@@ -229,7 +229,12 @@ def profile(request, profile_id):
         "is_followed": is_followed,
         "current_page": "profile"
     }
+    
+    # Render the main profile.html for both HTMX and regular requests
+    # if request.htmx: # Removed condition
+    #     return render(request, "network/_profile_content.html", context)
     return render(request, "network/profile.html", context)
+    
 
 def follow(request):
     # POST request required
@@ -291,11 +296,11 @@ def following(request):
         if request.GET.get('filter') == 'true':
             # Only return the post feed area for filter buttons
             return render(request, 'network/_post_feed_area.html', context)
-        else:
+        # else: # Removed else block - render the main following.html for full content swaps
             # This is a full navigation request from nav bar
-            return render(request, 'network/following_content.html', context)
+            # return render(request, 'network/_following_content.html', context)
 
-    # For regular page load, render the full page
+    # For regular page load or full HTMX content swap, render the full page
     return render(request, "network/following.html", context)
 
 @csrf_exempt
@@ -560,6 +565,70 @@ def delete_comment(request, comment_id):
     
     # Return an empty response as the comment div will be removed
     return HttpResponse("")
+
+# --- Add Comment Editing Views ---
+
+@login_required
+def edit_comment(request, comment_id):
+    """Returns the HTML form for editing a comment."""
+    comment = get_object_or_404(Comment, id=comment_id)
+
+    # Check if user is the author
+    if request.user != comment.comment_by:
+        return HttpResponseBadRequest("You cannot edit this comment")
+
+    # Return the edit form template
+    context = {'comment': comment}
+    html = render_to_string('network/_edit_comment_form.html', context, request=request)
+    return HttpResponse(html)
+
+
+@login_required
+def update_comment(request, comment_id):
+    """Updates the comment content."""
+    if request.method != "PUT":
+        # HTMX sends PUT for form submissions with hx-put
+        return HttpResponseBadRequest("Method not allowed - Expected PUT")
+
+    comment = get_object_or_404(Comment, id=comment_id)
+
+    # Check if user is the author
+    if request.user != comment.comment_by:
+        return HttpResponseBadRequest("You cannot edit this comment")
+
+    # Parse PUT data (HTMX sends it as form data in the body)
+    put_data = QueryDict(request.body)
+    new_comment_text = put_data.get('comment', '').strip()
+
+    if not new_comment_text:
+        # Optionally, return the form with an error instead of just BadRequest
+        # context = {'comment': comment, 'error': 'Comment cannot be empty'}
+        # html = render_to_string('network/_edit_comment_form.html', context, request=request)
+        # return HttpResponse(html, status=400) # Indicate bad request
+        return HttpResponseBadRequest("Comment cannot be empty")
+
+    # Update the comment
+    comment.comment = new_comment_text
+    comment.timestamp = timezone.now() # Update timestamp on edit
+    comment.save()
+
+    # Return the updated comment item partial to replace the form
+    context = {'comment': comment}
+    html = render_to_string('network/_comment_item.html', context, request=request)
+    return HttpResponse(html)
+
+
+@login_required
+def cancel_edit_comment(request, comment_id):
+    """Cancels editing and returns the original comment view."""
+    comment = get_object_or_404(Comment, id=comment_id)
+    # No need to check author here - cancelling only swaps back the original view.
+    # The crucial authorization checks happen in edit_comment (GET) and update_comment (PUT).
+
+    # Return the original comment item partial
+    context = {'comment': comment}
+    html = render_to_string('network/_comment_item.html', context, request=request)
+    return HttpResponse(html)
 
 
 

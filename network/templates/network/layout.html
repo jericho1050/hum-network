@@ -44,7 +44,8 @@
                                hx-get="{% url 'profile' user.id %}?htmx=true"
                                hx-target="#main-content"
                                hx-push-url="true"
-                               hx-swap="innerHTML show:window:top">
+                               hx-swap="innerHTML show:window:top"
+                               hx-select="#main-content">
                                 <strong>{{ user.username }}</strong>
                             </a>
                         </li>
@@ -55,7 +56,10 @@
                            hx-get="{% url 'index' %}?htmx=true"
                            hx-target="#main-content"
                            hx-push-url="true"
-                           hx-swap="innerHTML show:window:top">All Posts</a>
+                           hx-swap="innerHTML show:window:top"
+                           hx-select="#main-content">
+                           All Posts
+                        </a>
                     </li>
                     {% if user.is_authenticated %}
                         <li class="nav-item">
@@ -64,7 +68,10 @@
                                hx-get="{% url 'following' %}?htmx=true"
                                hx-target="#main-content"
                                hx-push-url="true" 
-                               hx-swap="innerHTML show:window:top">Following</a>
+                               hx-swap="innerHTML show:window:top"
+                               hx-select="#main-content">
+                               Following
+                            </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="{% url 'logout' %}">Log Out</a>
@@ -76,7 +83,10 @@
                                hx-get="{% url 'login' %}?htmx=true"
                                hx-target="#main-content"
                                hx-push-url="true"
-                               hx-swap="innerHTML show:window:top">Log In</a>
+                               hx-swap="innerHTML show:window:top"
+                               hx-select="#main-content">
+                               Log In
+                            </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" 
@@ -84,7 +94,10 @@
                                hx-get="{% url 'register' %}?htmx=true"
                                hx-target="#main-content"
                                hx-push-url="true"
-                               hx-swap="innerHTML show:window:top">Register</a>
+                               hx-swap="innerHTML show:window:top"
+                               hx-select="#main-content">
+                               Register
+                            </a>
                         </li>
                     {% endif %}
                 </ul>
