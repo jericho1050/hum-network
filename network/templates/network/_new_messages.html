@@ -1,0 +1,6 @@
+{% for message in messages %}
+    {% include "network/_message.html" with message=message %}
+{% endfor %}
+
+{# Remove the hidden div below - no longer needed #}
+{# <div data-last-message-id="{{ last_message_id }}" class="d-none"></div> #} 

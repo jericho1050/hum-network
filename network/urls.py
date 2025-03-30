@@ -24,6 +24,12 @@ urlpatterns = [
     path("update_comment/<int:comment_id>/", views.update_comment, name="update_comment"),
     path("cancel_edit_comment/<int:comment_id>/", views.cancel_edit_comment, name="cancel_edit_comment"),
 
+    # Chat Routes
+    path("messages/", views.conversation_list_view, name="conversation_list"),
+    path("chat/<str:username>/", views.chat_view, name="chat"),
+    path("chat/<str:username>/send/", views.send_message_view, name="send_message"),
+    path("chat/<str:username>/poll/", views.poll_new_messages_view, name="poll_messages"),
+
     # API Routes
     path("posts", views.post, name="post"),
     path("follow", views.follow, name="follow"),

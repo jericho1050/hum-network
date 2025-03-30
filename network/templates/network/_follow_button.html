@@ -1,7 +1,7 @@
 {% if user.is_authenticated and user.id != profile.id %}
   <form hx-post="{% url 'toggle_follow' profile.id %}"
         hx-target="#follow-section"
-        hx-swap="outerHTML"
+        hx-swap="innerHTML"
         class="d-inline">
     {% csrf_token %}
     <button type="submit" 

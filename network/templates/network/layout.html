@@ -74,6 +74,17 @@
                             </a>
                         </li>
                         <li class="nav-item">
+                            <a class="nav-link" 
+                               href="{% url 'conversation_list' %}"
+                               hx-get="{% url 'conversation_list' %}?htmx=true"
+                               hx-target="#main-content"
+                               hx-push-url="true"
+                               hx-swap="innerHTML show:window:top"
+                               hx-select="#main-content">
+                               Messages
+                            </a>
+                        </li>
+                        <li class="nav-item">
                             <a class="nav-link" href="{% url 'logout' %}">Log Out</a>
                         </li>
                     {% else %}
@@ -100,7 +111,7 @@
                             </a>
                         </li>
                     {% endif %}
-                </ul>
+            </ul>
                 </div>
              </div>
           </nav>
@@ -122,5 +133,6 @@
                 }
             });
         </script>
+
     </body>
 </html>

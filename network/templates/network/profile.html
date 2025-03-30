@@ -65,8 +65,13 @@
             </div>
 
             <div class="col-md-8">
+                <div class="d-flex gap-4">
                 <h2 class="mb-1">{{ profile.username }}</h2>
-
+                <!-- Follow button section -->
+                <div id="follow-section">
+                    {% include "network/_follow_button.html" with profile=profile is_followed=is_followed %}
+                </div>
+            </div>
                 <div class="profile-stats mb-3">
                     <div class="profile-stat">
                         <div class="profile-stat-value">{{ posts.paginator.count }}</div>
@@ -82,10 +87,21 @@
                     </div>
                 </div>
 
-                <!-- Follow button section -->
-                <div id="follow-section">
-                    {% include "network/_follow_button.html" with profile=profile is_followed=is_followed %}
+                
+                <!-- Chat button - only show for other users' profiles -->
+                {% if user.is_authenticated and user.id != profile.id %}
+                <div class="mt-2">
+                    <a href="{% url 'chat' profile.username %}" 
+                       class="btn btn-outline-primary"
+                       hx-get="{% url 'chat' profile.username %}?htmx=true"
+                       hx-target="#main-content"
+                       hx-push-url="true"
+                       hx-swap="innerHTML show:window:top"
+                       hx-select="#main-content">
+                        <i class="bi bi-chat-dots"></i> Send Message
+                    </a>
                 </div>
+                {% endif %}
             </div>
         </div>
     </div>

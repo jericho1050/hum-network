@@ -1,0 +1,8 @@
+{% for message in messages %}
+    {% include "network/_message.html" with message=message %}
+{% empty %}
+    <div class="text-center text-muted p-4">
+        <p>No messages yet. Start the conversation!</p>
+    </div>
+{% endfor %}
+

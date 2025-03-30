@@ -1,0 +1,13 @@
+<div class="message mb-2 {% if message.sender == user %}message-sent{% else %}message-received{% endif %}">
+    <div class="message-bubble p-2 rounded {% if message.sender == user %}bg-primary text-white ms-auto{% else %}bg-white border{% endif %}" 
+         style="max-width: 80%; width: fit-content; {% if message.sender == user %}margin-left: auto;{% endif %}">
+        <div class="message-content">
+            {{ message.content }}
+        </div>
+        <div class="message-time text-end">
+            <small class="{% if message.sender == user %}text-white-50{% else %}text-muted{% endif %}">
+                {{ message.timestamp|date:"g:i A" }}
+            </small>
+        </div>
+    </div>
+</div> 

@@ -54,3 +54,19 @@ class Comment(models.Model):
 
     def __str__(self):
         return f"{self.comment_by} commented on {self.comment_to}"
+
+class ChatMessage(models.Model):
+    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_messages')
+    receiver = models.ForeignKey(User, on_delete=models.CASCADE, related_name='received_messages')
+    content = models.TextField()
+    timestamp = models.DateTimeField(auto_now_add=True, db_index=True)
+    is_read = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ['timestamp']
+        indexes = [
+            models.Index(fields=['sender', 'receiver', 'timestamp']),
+        ]
+
+    def __str__(self):
+        return f"{self.sender} to {self.receiver}: {self.content[:50]}"

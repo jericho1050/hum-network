@@ -3,19 +3,21 @@ from json import JSONDecodeError
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError
-from django.http import HttpResponse, HttpResponseRedirect, JsonResponse, HttpResponseBadRequest, QueryDict
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse, HttpResponseBadRequest, QueryDict, HttpResponseNotFound
 from django.core.paginator import Paginator
 from django.shortcuts import redirect, render, get_object_or_404
 from django.template.loader import render_to_string
 from django.utils import timezone
 from django_htmx.http import HttpResponseClientRefresh
+from django.views.decorators.http import require_POST
 
 from django.urls import reverse
 
 from django.views.decorators.csrf import csrf_exempt
 
+from django.db.models import Q, OuterRef, Exists
 
-from .models import User, Post, Likes, Follow, Comment
+from .models import User, Post, Likes, Follow, Comment, ChatMessage
 from .forms import UserProfilePicForm, PostModelForm, PostForm
 
 @login_required
@@ -630,6 +632,178 @@ def cancel_edit_comment(request, comment_id):
     context = {'comment': comment}
     html = render_to_string('network/_comment_item.html', context, request=request)
     return HttpResponse(html)
+
+# Chat related views
+@login_required
+def chat_view(request, username):
+    """
+    Main chat view that displays the chat interface and historical messages
+    between the logged-in user and the selected recipient.
+    """
+    if not username:
+        username = request.user.username
+        
+    try:
+        recipient = User.objects.get(username=username)
+    except User.DoesNotExist:
+        return HttpResponseNotFound("User not found")
+    
+    # Don't allow chatting with yourself
+    if recipient == request.user:
+        return HttpResponseBadRequest("You cannot chat with yourself")
+    
+    # Get all messages between these two users (in both directions)
+    messages = ChatMessage.objects.filter(
+        (Q(sender=request.user) & Q(receiver=recipient)) |
+        (Q(sender=recipient) & Q(receiver=request.user))
+    ).order_by('timestamp')
+    
+    # Mark all messages from recipient as read
+    unread_messages = messages.filter(sender=recipient, is_read=False)
+    unread_messages.update(is_read=True)
+    
+    context = {
+        'recipient': recipient,
+        'messages': messages,
+        'last_message_id': messages.last().id if messages.exists() else 0,
+    }
+    
+    # Check if this is an HTMX request
+    if request.headers.get('HX-Request'):
+        return render(request, "network/chat.html", context)
+    else:
+        return render(request, "network/chat.html", context)
+
+@login_required
+@require_POST
+def send_message_view(request, username):
+    """
+    Handle sending a new message via HTMX post request.
+    """
+
+    try:
+        recipient = User.objects.get(username=username)
+    except User.DoesNotExist:
+        return HttpResponseNotFound("User not found")
+    
+    # Get message content from POST data
+    content = request.POST.get('content', '').strip()
+    
+    if not content:
+        return HttpResponseBadRequest("Message cannot be empty")
+    
+    # Create and save the new message
+    message = ChatMessage.objects.create(
+        sender=request.user,
+        receiver=recipient,
+        content=content
+    )
+    
+    # Return empty response (204 No Content)
+    # The message will appear in the next poll cycle
+    return HttpResponse(status=204)
+
+@login_required
+def poll_new_messages_view(request, username):
+    """
+    Polling endpoint that returns only new messages since the last message seen.
+    Used by HTMX to periodically check for new messages.
+    Sends HX-Trigger header with the latest message ID.
+    """
+    try:
+        recipient = User.objects.get(username=username)
+    except User.DoesNotExist:
+        return HttpResponseNotFound("User not found")
+    
+    last_seen_id_param = request.GET.get('last_message_id', '0') # Get as string
+    print(f"[Poll View] Received last_message_id param: '{last_seen_id_param}'") # Log received param
+    
+    try:
+        last_seen_id = int(last_seen_id_param)
+    except ValueError:
+        last_seen_id = 0
+    print(f"[Poll View] Using integer last_seen_id: {last_seen_id}") # Log parsed int
+    
+    new_messages = ChatMessage.objects.filter(
+        (Q(sender=request.user) & Q(receiver=recipient)) |
+        (Q(sender=recipient) & Q(receiver=request.user)),
+        id__gt=last_seen_id
+    ).order_by('timestamp')
+    
+    print(f"[Poll View] Found {new_messages.count()} new messages with ID > {last_seen_id}") # Log count found
+    
+    new_messages.filter(sender=recipient, is_read=False).update(is_read=True)
+    
+    if not new_messages.exists():
+        print("[Poll View] No new messages found, returning 204") # Log 204 case
+        return HttpResponse(status=204) # No new messages, no content needed
+    
+    last_message_id = new_messages.last().id
+    print(f"[Poll View] Returning {new_messages.count()} messages. New last_message_id: {last_message_id}") # Log before returning
+ 
+    context = {
+        'messages': new_messages,
+        'recipient': recipient,
+    }
+    
+    # Render the HTML fragment
+    html_content = render_to_string("network/_new_messages.html", context, request=request)
+    
+    # Create the response object
+    response = HttpResponse(html_content)
+    
+    # Prepare the data for HX-Trigger
+    trigger_data = json.dumps({
+        "newMessages": { # Event name
+            "lastId": last_message_id # Data payload
+        }
+    })
+    
+    # Set the HX-Trigger header
+    response['HX-Trigger'] = trigger_data
+    
+    return response
+
+@login_required
+def conversation_list_view(request):
+    """
+    Displays a list of users the current user has had conversations with,
+    indicating which conversations have unread messages.
+    """
+    user = request.user
+    
+    # Find distinct users the current user has sent messages to or received messages from
+    sent_partner_ids = ChatMessage.objects.filter(sender=user).values_list('receiver_id', flat=True)
+    received_partner_ids = ChatMessage.objects.filter(receiver=user).values_list('sender_id', flat=True)
+    
+    partner_ids = set(list(sent_partner_ids) + list(received_partner_ids))
+    
+    # Query for the User objects of these partners
+    partners = User.objects.filter(id__in=partner_ids)
+    
+    # Annotate each partner with an indicator if there are unread messages *from them*
+    unread_subquery = ChatMessage.objects.filter(
+        receiver=user, 
+        sender=OuterRef('pk'), # Correlate with the partner User object
+        is_read=False
+    )
+    
+    partners = partners.annotate(
+        has_unread=Exists(unread_subquery)
+    ).order_by('-has_unread', 'username') # Show users with unread messages first
+    
+    context = {
+        'partners': partners
+    }
+    
+    # Handle HTMX request for partial update vs full page load
+    if request.htmx:
+        # If using HTMX navigation, you might return just the content block
+        # Assuming #main-content is the target in layout.html
+        return render(request, 'network/conversation_list.html', context)
+    else:
+        # Full page load
+        return render(request, 'network/conversation_list.html', context)
 
 
 
