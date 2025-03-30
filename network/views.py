@@ -8,6 +8,7 @@ from django.core.paginator import Paginator
 from django.shortcuts import redirect, render, get_object_or_404
 from django.template.loader import render_to_string
 from django.utils import timezone
+from django_htmx.http import HttpResponseClientRefresh
 
 from django.urls import reverse
 
