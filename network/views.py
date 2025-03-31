@@ -805,8 +805,49 @@ def conversation_list_view(request):
         # Full page load
         return render(request, 'network/conversation_list.html', context)
 
+# User list view with search functionality
+@login_required
+def user_list_view(request):
+    """
+    Display a list of all registered users, excluding the current user.
+    Includes search functionality based on username.
+    """
+    # Get the optional search parameter from the request
+    search_query = request.GET.get('search', '')
+    
+    # Query for all users except the current user
+    users = User.objects.exclude(id=request.user.id)
+    
+    # Apply search filter if a search term is provided
+    if search_query:
+        # Case-insensitive partial match on username
+        users = users.filter(username__icontains=search_query)
+    
+    # Order users alphabetically by username for consistent display
+    users = users.order_by('username')
+    
+    # Implement pagination - show 20 users per page
+    paginator = Paginator(users, 20)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        'users': page_obj,
+        'search_query': search_query,
+        'current_page': 'user_list'
+    }
+    
+    # If it's an HTMX request, we might want to render only the user list portion
+    if request.htmx:
+        # For now, we'll render the full page. Later we can implement partial updates
+        # for dynamic search if needed
+        return render(request, 'network/user_list.html', context)
+    
+    # Regular request gets the full page
+    return render(request, 'network/user_list.html', context)
 
 
 
-        
+
+
 

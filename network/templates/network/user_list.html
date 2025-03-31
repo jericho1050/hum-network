@@ -1,0 +1,144 @@
+{% extends "network/layout.html" %}
+
+{% block body %}
+<div class="container mt-4">
+    <h2 class="mb-4">Explore Users</h2>
+    
+    <!-- Search Form -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-body">
+            <div action="" class="d-flex align-items-center">
+                <div class="flex-grow-1 me-2">
+                    <div class="input-group">
+                        <input type="text" 
+                               name="search" 
+                               class="form-control"
+                               placeholder="Search users by username..." 
+                               value="{{ search_query }}"
+                               aria-label="Search users"
+                               hx-get="{% url 'user_list' %}"
+                               hx-trigger="input changed delay:500ms, keyup[key=='Enter'], load"
+                               hx-select="#user-cards-body"
+                               hx-target="#user-cards"
+
+                               >
+                        <button class="btn btn-info text-muted " disabled type="submit">
+                          <i class="bi bi-search"></i>
+                        </button>
+                    </div>
+                </div>
+                {% if search_query %}
+                <div>
+                    <a href="{% url 'user_list' %}" class="btn btn-outline-secondary d-flex">
+                        <i class="bi bi-x-circle"></i> Clear
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- User List -->
+    <div class="card shadow-sm" id="user-cards">
+        <div class="card-body" id="user-cards-body">
+            <h5 class="card-title mb-3">
+                {% if search_query %}
+                    Search results for "{{ search_query }}"
+                {% else %}
+                    All Users
+                {% endif %}
+                <span class="badge bg-primary">{{ users.paginator.count }}</span>
+            </h5>
+
+            {% if users %}
+                <div class="list-group">
+                    {% for user_item in users %}
+                        <a href="{% url 'profile' user_item.id %}" 
+                           class="list-group-item list-group-item-action d-flex align-items-center">
+                            <div class="me-3">
+                                {% if user_item.profile_picture %}
+                                <img src="{{ user_item.profile_picture.url }}" 
+                                     class="rounded-circle" 
+                                     width="50" height="50" 
+                                     alt="{{ user_item.username }}'s profile picture">
+                                {% else %}
+                                <img src="{{ MEDIA_URL }}no-picture.jpg" 
+                                     class="rounded-circle" 
+                                     width="50" height="50" 
+                                     alt="Default profile picture">
+                                {% endif %}
+                            </div>
+                            <div>
+                                <h6 class="mb-0">{{ user_item.username }}</h6>
+                                <small class="text-muted">
+                                    Joined {{ user_item.date_joined|date:"F Y" }}
+                                </small>
+                            </div>
+                        </a>
+                    {% endfor %}
+                </div>
+
+                <!-- Pagination -->
+                {% if users.paginator.num_pages > 1 %}
+                <nav aria-label="User list pagination" class="mt-4">
+                    <ul class="pagination justify-content-center">
+                        <!-- Previous page -->
+                        {% if users.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" 
+                               href="?{% if search_query %}search={{ search_query }}&{% endif %}page={{ users.previous_page_number }}">
+                                &laquo; Previous
+                            </a>
+                        </li>
+                        {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">&laquo; Previous</span>
+                        </li>
+                        {% endif %}
+
+                        <!-- Page numbers -->
+                        {% for i in users.paginator.page_range %}
+                            {% if users.number == i %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ i }}</span>
+                            </li>
+                            {% elif i > users.number|add:"-3" and i < users.number|add:"3" %}
+                            <li class="page-item">
+                                <a class="page-link" 
+                                   href="?{% if search_query %}search={{ search_query }}&{% endif %}page={{ i }}">
+                                    {{ i }}
+                                </a>
+                            </li>
+                            {% endif %}
+                        {% endfor %}
+
+                        <!-- Next page -->
+                        {% if users.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" 
+                               href="?{% if search_query %}search={{ search_query }}&{% endif %}page={{ users.next_page_number }}">
+                                Next &raquo;
+                            </a>
+                        </li>
+                        {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">Next &raquo;</span>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
+
+            {% else %}
+                <div class="alert alert-info">
+                    {% if search_query %}
+                        No users found matching "{{ search_query }}".
+                    {% else %}
+                        No users found in the system.
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

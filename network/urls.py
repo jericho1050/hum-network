@@ -9,6 +9,7 @@ urlpatterns = [
     path("register", views.register, name="register"),
     path("profile/<int:profile_id>", views.profile, name="profile"),
     path("following", views.following, name="following"),
+    path("users/", views.user_list_view, name="user_list"),  # New URL for user list page
 
     # HTMX Routes
     path("toggle_like/<int:post_id>/", views.toggle_like, name="toggle_like"),

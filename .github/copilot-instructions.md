@@ -3,7 +3,7 @@ description:
 globs: 
 alwaysApply: true
 ---
-# CS50W Network Project Rules (Django + HTMX)
+# Network Project Rules (Django + HTMX)
 
 ## 1. Core Technology Stack:
 - **Backend:** Python with Django 4.2.6. Uses the Django ORM.
